@@ -1,5 +1,3 @@
-import Highcharts from 'highcharts';
-
 /**
 * A Highcharts data visualisation.
 *
@@ -30,30 +28,126 @@ class HighchartsWrapper {
       chart: {
         type: 'column',
         width: 650,
+        animation: Highcharts.svg,
       },
       title: {
         text: 'Highcharts & Handsontable',
       },
+      plotOptions: {
+        spline: {
+          dataLabels: {
+            enabled: true,
+          },
+          marker: {
+            enabled: true,
+          },
+          enableMouseTracking: false,
+        },
+      },
+      yAxis: {
+        title: {
+          text: 'Seconds',
+        },
+      },
       xAxis: {
-        categories: hotInstance.getSettings().colHeaders,
+        categories: HighchartsWrapper.updateTaskColumn(hotInstance),
       },
       series: [{
         colorByPoint: true,
-        data: hotInstance.getDataAtRow(0),
+        data: HighchartsWrapper.initTimeSpentData(hotInstance),
       }],
     };
+  }
+
+  /**
+* Helper function.
+*
+* Zip column header to the value of the column from Handsontable object settings.
+* amCharts data provider needs data array in form:
+*
+* @example
+*
+*  "data": [0, 1, 2]
+*
+*
+* @param {Object} Handsontable object.
+* @returns {Array} a merged key-value pair in array.
+*/
+  static initTimeSpentData(hotInstance) {
+    const rowsArray = [];
+
+    for (let index = 0; index < hotInstance.countRows(); index += 1) {
+      rowsArray.push(0);
+    }
+
+    return rowsArray;
+  }
+
+  /**
+* Helper function.
+*
+*
+*
+* @param {Object} Handsontable object.
+* @returns {Array} a date array.
+*/
+  static updateTaskColumn(hotInstance) {
+    const categoriesArray = [];
+
+    for (let index = 0; index < hotInstance.countRows(); index += 1) {
+      categoriesArray.push(hotInstance.getDataAtCell(index, 0));
+    }
+
+    return categoriesArray;
+  }
+
+  /**
+*
+* Remove row
+*
+* @param {Number} index index remove row.
+* @param {Object} Handsontable object.
+*
+*/
+  removeRow(index, hotInstance) {
+    this.chart.series[0].data.splice(index, 1); console.log(this.chart.series[0]);
+
+    this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
+  }
+
+  /**
+*
+* Create new row
+*
+* @param {Number} index index next row.
+* @param {Object} Handsontable object.
+*
+*/
+  addNewRow(index, hotInstance) {
+    this.chart.series[0].data.splice(index, 0, 0); console.log(this.chart.series[0]);
+
+    this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
   }
 
 /**
 *
 * Watches changes from Handsontable and updates it in the chart.
 *
+* @param {Number} row row index.
 * @param {Number} column column index.
 * @param {Number} value column value.
 *
 */
-  updateChartData(column, value) {
-    this.chart.series[0].data[column].update(value);
+  updateCellData(row, column, value) {
+    if (value.includes(':')) {
+      const valueSplit = value.split(':');
+      const seconds = (((+valueSplit[0]) * (60 * 60)) + ((+valueSplit[1]) * 60) + (+valueSplit[2]));
+
+      this.chart.series[0].data[row].update(seconds);
+    } else if (column === 0) {
+      this.chart.series[0].data[row].update(value);
+      console.log(this.chart.series[0].data[row]);
+    }
   }
 }
 

@@ -2,15 +2,19 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = [
   {
-    entry: {
-      amCharts: './integrations/wrappers/amChartsIndex.js',
-      highCharts: './integrations/wrappers/highchartsIndex.js',
-      fusionCharts: './integrations/wrappers/fusionChartsIndex.js',
-      chartJs: './integrations/wrappers/chartJsIndex.js',
-    },
+    entry: [
+      `${__dirname}/integrations/index.js`,
+    ],
     output: {
-      filename: '[name].bundle.js',
+      filename: 'bundle.js',
       path: `${__dirname}/public/assets/js`,
+    },
+    externals: {
+      handsontable: 'Handsontable',
+      amcharts: 'amcharts3',
+      'chart.js': 'Chart',
+      fusioncharts: 'FusionCharts',
+      highcharts: 'Highcharts',
     },
     module: {
       loaders: [
@@ -31,6 +35,7 @@ module.exports = [
         { from: 'node_modules/codemirror/lib/codemirror.css', to: `${__dirname}/public/assets/styles` },
         { from: 'node_modules/codemirror/theme/dracula.css', to: `${__dirname}/public/assets/styles` },
         { from: 'node_modules/handsontable/dist/handsontable.full.min.css', to: `${__dirname}/public/assets/styles` },
+        { from: 'node_modules/handsontable/dist/handsontable.full.min.js', to: `${__dirname}/public/assets/js` },
       ]),
     ],
     stats: {

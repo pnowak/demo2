@@ -1,5 +1,3 @@
-import Chart from 'chart.js';
-
 /**
 * A ChartJs data visualisation.
 *
@@ -29,9 +27,9 @@ class ChartJsWrapper {
     return {
       type: 'bar',
       data: {
-        labels: hotInstance.getSettings().colHeaders,
+        labels: ChartJsWrapper.updateTaskColumn(hotInstance),
         datasets: [{
-          data: hotInstance.getDataAtRow(0),
+          data: ChartJsWrapper.initTimeSpentData(hotInstance),
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(54, 162, 235, 0.2)',
@@ -64,6 +62,10 @@ class ChartJsWrapper {
         }],
       },
       options: {
+        animation: {
+          duration: 1000,
+          easing: 'linear',
+        },
         legend: {
           display: false,
         },
@@ -81,12 +83,12 @@ class ChartJsWrapper {
           yAxes: [{
             ticks: {
               beginAtZero: true,
-              fontSize: 24,
+              fontSize: 23,
             },
           }],
           xAxes: [{
             ticks: {
-              fontSize: 24,
+              fontSize: 23,
             },
           }],
         },
@@ -94,7 +96,77 @@ class ChartJsWrapper {
     };
   }
 
-/**
+  /**
+* Helper function.
+*
+* Zip column header to the value of the column from Handsontable object settings.
+* amCharts data provider needs data array in form:
+*
+* @example
+* {
+*  label: "Game 1",
+*  data: [144, 12, 13]
+* }
+*
+* @param {Object} Handsontable object.
+* @returns {Array} a merged key-value pair in array.
+*/
+  static initTimeSpentData(hotInstance) {
+    const rowsArray = [];
+
+    for (let index = 0; index < hotInstance.countRows(); index += 1) {
+      rowsArray.push(0);
+    }
+
+    return rowsArray;
+  }
+
+  /**
+* Helper function.
+*
+* @param {Object} Handsontable object.
+* @returns {Array} a array with task label.
+*/
+  static updateTaskColumn(hotInstance) {
+    const categoriesArray = [];
+
+    for (let indexRow = 0; indexRow < hotInstance.countRows(); indexRow += 1) {
+      categoriesArray.push(hotInstance.getDataAtCell(indexRow, 0));
+    }
+
+    return categoriesArray;
+  }
+
+  /**
+*
+*
+*
+* @param {}
+*
+*/
+  removeRow(index) {
+    this.chart.data.datasets[0].data.splice(index, 1);
+    this.chart.data.labels.splice(index, 1);
+
+    this.chart.update();
+  }
+
+  /**
+*
+* Create new row
+*
+* @param {Number} index index next row.
+* @param {Object} Handsontable object.
+*
+*/
+  addNewRow(index) {
+    this.chart.data.datasets[0].data.splice(index, 0, 0);
+    this.chart.data.labels.splice(index, 0, null);
+
+    this.chart.update();
+  }
+
+  /**
 *
 * Watches changes from Handsontable and updates it in the chart.
 *
@@ -102,9 +174,17 @@ class ChartJsWrapper {
 * @param {Number} value column value.
 *
 */
-  updateChartData(column, value) {
-    this.chart.data.datasets[0].data[column] = value;
-    this.chart.update();
+  updateCellData(row, column, value) {
+    if (value.includes(':')) {
+      const valueSplit = value.split(':');
+      const seconds = (((+valueSplit[0]) * (60 * 60)) + ((+valueSplit[1]) * 60) + (+valueSplit[2]));
+
+      this.chart.data.datasets[0].data[row] = seconds;
+      this.chart.update();
+    } else if (column === 0) {
+      this.chart.data.labels[row] = value;
+      this.chart.update();
+    }
   }
 }
 
