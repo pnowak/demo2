@@ -444,8 +444,7 @@ var AmChartsWrapper = function () {
         categoryAxis: {
           gridPosition: 'start',
           gridAlpha: 0,
-          tickPosition: 'start',
-          tickLength: 20
+          tickPosition: 'start'
         },
         graphs: [{
           balloonText: '[[category]]: <b>[[value]]</b>',
@@ -455,9 +454,9 @@ var AmChartsWrapper = function () {
           valueField: 'data'
         }],
         valueAxes: [{
-          gridColor: '#FFFFFF',
-          gridAlpha: 0.2,
-          dashLength: 0
+          minimum: 1,
+          maximum: 120,
+          strictMinMax: true
         }],
         export: {
           enabled: true
@@ -642,8 +641,11 @@ var ChartJsWrapper = function () {
             yAxes: [{
               ticks: {
                 beginAtZero: true,
-                fontSize: 23
-              }
+                fontSize: 23,
+                min: 0,
+                stepSize: 100
+              },
+              scaleSteps: 10
             }],
             xAxes: [{
               ticks: {
@@ -827,7 +829,9 @@ var FusionChartsWrapper = function () {
           chart: {
             caption: 'FusionCharts & Handsontable',
             xAxisName: 'Task',
-            yAxisName: 'Seconds'
+            yAxisName: 'Seconds',
+            yAxisMinValue: 1,
+            yAxisMaxValue: 100
           },
           data: FusionChartsWrapper.zipTaskWithTimeData(hotInstance)
         }
@@ -930,7 +934,7 @@ var HighchartsWrapper = function () {
     _classCallCheck(this, HighchartsWrapper);
 
     this.name = 'highcharts';
-    this.chart = new Highcharts.Chart(document.getElementById(highChartsRootId), HighchartsWrapper.getChartOptions(hotInstance));
+    this.chart = new Highcharts.Chart(document.getElementById(highChartsRootId), HighchartsWrapper.getChartOptions(hotInstance));console.log(this.chart);
   }
 
   /**
@@ -954,7 +958,7 @@ var HighchartsWrapper = function () {
     *
     */
     value: function removeRow(index, hotInstance) {
-      this.chart.series[0].data.splice(index, 1);console.log(this.chart.series[0]);
+      this.chart.series[index].remove();console.log(this.chart.series);
 
       this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
     }
@@ -971,7 +975,12 @@ var HighchartsWrapper = function () {
   }, {
     key: 'addNewRow',
     value: function addNewRow(index, hotInstance) {
-      this.chart.series[0].data.splice(index, 0, 0);console.log(this.chart.series[0]);
+      var object = {};
+
+      object.name = 'Task';
+      object.data = 0;
+
+      this.chart.addSeries(object);console.log(this.chart.series);
 
       this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
     }
@@ -988,15 +997,14 @@ var HighchartsWrapper = function () {
 
   }, {
     key: 'updateCellData',
-    value: function updateCellData(row, column, value) {
+    value: function updateCellData(row, column, value, hotInstance) {
       if (value.includes(':')) {
         var valueSplit = value.split(':');
         var seconds = +valueSplit[0] * (60 * 60) + +valueSplit[1] * 60 + +valueSplit[2];
-
-        this.chart.series[0].data[row].update(seconds);
+        console.log(this.chart.series);
+        this.chart.series[row].data.update(seconds);
       } else if (column === 0) {
-        this.chart.series[0].data[row].update(value);
-        console.log(this.chart.series[0].data[row]);
+        this.chart.series[row].data.update(value);
       }
     }
   }], [{
@@ -1025,15 +1033,14 @@ var HighchartsWrapper = function () {
         yAxis: {
           title: {
             text: 'Seconds'
-          }
+          },
+          minRange: 100,
+          min: 0
         },
         xAxis: {
           categories: HighchartsWrapper.updateTaskColumn(hotInstance)
         },
-        series: [{
-          colorByPoint: true,
-          data: HighchartsWrapper.initTimeSpentData(hotInstance)
-        }]
+        series: HighchartsWrapper.initTimeSpentData(hotInstance)
       };
     }
 
@@ -1058,7 +1065,12 @@ var HighchartsWrapper = function () {
       var rowsArray = [];
 
       for (var index = 0; index < hotInstance.countRows(); index += 1) {
-        rowsArray.push(0);
+        var object = {};
+
+        object.name = hotInstance.getDataAtCell(index, 0);
+        object.data = 0;
+
+        rowsArray.push(object);
       }
 
       return rowsArray;

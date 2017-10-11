@@ -84,7 +84,10 @@ class ChartJsWrapper {
             ticks: {
               beginAtZero: true,
               fontSize: 23,
+              min: 0,
+              stepSize: 100,
             },
+            scaleSteps: 10,
           }],
           xAxes: [{
             ticks: {

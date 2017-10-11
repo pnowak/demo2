@@ -37,6 +37,8 @@ class FusionChartsWrapper {
           caption: 'FusionCharts & Handsontable',
           xAxisName: 'Task',
           yAxisName: 'Seconds',
+          yAxisMinValue: 1,
+          yAxisMaxValue: 100,
         },
         data: FusionChartsWrapper.zipTaskWithTimeData(hotInstance),
       },

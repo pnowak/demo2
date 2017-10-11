@@ -35,7 +35,6 @@ class AmChartsWrapper {
         gridPosition: 'start',
         gridAlpha: 0,
         tickPosition: 'start',
-        tickLength: 20,
       },
       graphs: [{
         balloonText: '[[category]]: <b>[[value]]</b>',
@@ -45,9 +44,9 @@ class AmChartsWrapper {
         valueField: 'data',
       }],
       valueAxes: [{
-        gridColor: '#FFFFFF',
-        gridAlpha: 0.2,
-        dashLength: 0,
+        minimum: 1,
+        maximum: 120,
+        strictMinMax: true,
       }],
       export: {
         enabled: true,

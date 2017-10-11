@@ -14,7 +14,7 @@ class HighchartsWrapper {
   constructor(highChartsRootId, hotInstance) {
     this.name = 'highcharts';
     this.chart = new Highcharts.Chart(document.getElementById(highChartsRootId),
-    HighchartsWrapper.getChartOptions(hotInstance));
+    HighchartsWrapper.getChartOptions(hotInstance)); console.log(this.chart);
   }
 
 /**
@@ -48,14 +48,13 @@ class HighchartsWrapper {
         title: {
           text: 'Seconds',
         },
+        minRange: 100,
+        min: 0,
       },
       xAxis: {
         categories: HighchartsWrapper.updateTaskColumn(hotInstance),
       },
-      series: [{
-        colorByPoint: true,
-        data: HighchartsWrapper.initTimeSpentData(hotInstance),
-      }],
+      series: HighchartsWrapper.initTimeSpentData(hotInstance),
     };
   }
 
@@ -77,7 +76,12 @@ class HighchartsWrapper {
     const rowsArray = [];
 
     for (let index = 0; index < hotInstance.countRows(); index += 1) {
-      rowsArray.push(0);
+      const object = {};
+
+      object.name = hotInstance.getDataAtCell(index, 0);
+      object.data = 0;
+
+      rowsArray.push(object);
     }
 
     return rowsArray;
@@ -110,7 +114,7 @@ class HighchartsWrapper {
 *
 */
   removeRow(index, hotInstance) {
-    this.chart.series[0].data.splice(index, 1); console.log(this.chart.series[0]);
+    this.chart.series[index].remove(); console.log(this.chart.series);
 
     this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
   }
@@ -124,7 +128,12 @@ class HighchartsWrapper {
 *
 */
   addNewRow(index, hotInstance) {
-    this.chart.series[0].data.splice(index, 0, 0); console.log(this.chart.series[0]);
+    const object = {};
+
+    object.name = 'Task';
+    object.data = 0;
+
+    this.chart.addSeries(object); console.log(this.chart.series);
 
     this.chart.update(HighchartsWrapper.getChartOptions(hotInstance));
   }
@@ -138,15 +147,14 @@ class HighchartsWrapper {
 * @param {Number} value column value.
 *
 */
-  updateCellData(row, column, value) {
+  updateCellData(row, column, value, hotInstance) {
     if (value.includes(':')) {
       const valueSplit = value.split(':');
       const seconds = (((+valueSplit[0]) * (60 * 60)) + ((+valueSplit[1]) * 60) + (+valueSplit[2]));
-
-      this.chart.series[0].data[row].update(seconds);
+      console.log(this.chart.series);
+      this.chart.series[row].data.update(seconds);
     } else if (column === 0) {
-      this.chart.series[0].data[row].update(value);
-      console.log(this.chart.series[0].data[row]);
+      this.chart.series[row].data.update(value);
     }
   }
 }
